@@ -3,20 +3,27 @@ const Account = require('./accounts-model')
 
 exports.checkAccountPayload = (req, res, next) => {
   let {name, budget} = req.body
-  budget = Number(budget)
-  if (!name || !budget) {
+  const error = {status: 400}
+
+  name = name.trim()
+
+  if (name === undefined || budget === undefined) {
     next({status: 400, message: 'name and budget are required'})
   } else if (typeof name !== 'string') {
-    next({status: 400, message: 'name of account must be a string'})
+    error.message = 'name of account must be a string'
   } else if (typeof budget !== 'number' || isNaN(budget)) {
-    next({status: 400, message: 'budget of account must be a number'})
+    error.message = 'budget of account must be a number'
   } else if (name.trim().length < 3 || name.trim().length > 100) {
-    next({status: 400, message: 'name of account must be between 3 and 100'})
+    error.message = 'name of account must be between 3 and 100'
   } else if (budget < 0 || budget > 1000000) {
-    next({status: 400, message: 'budget of account is too large or too small'})
+    error.message = 'budget of account is too large or too small'
+  }
+
+  if (error.message) {
+    next(error)
   } else {
     req.data = {
-      name: name.trim(),
+      name: name,
       budget: budget,
     }
     next()

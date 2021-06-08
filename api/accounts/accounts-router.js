@@ -34,17 +34,32 @@ router.post(
   }
 )
 
-router.put('/:id', (req, res, next) => {
-  // DO YOUR MAGIC
-})
+router.put(
+  '/:id',
+  checkAccountId,
+  checkAccountPayload,
+  async (req, res, next) => {
+    try {
+      const updatedAccount = await Account.updateById(req.params.id, req.data)
+      res.status(200).json(updatedAccount)
+    } catch (error) {
+      next(error)
+    }
+  }
+)
 
-router.delete('/:id', (req, res, next) => {
-  // DO YOUR MAGIC
+router.delete('/:id', checkAccountId, async (req, res, next) => {
+  try {
+    await Account.deleteById(req.params.id)
+    res.status(200).json({message: 'Account Deleted'})
+  } catch (error) {
+    next(error)
+  }
 })
 
 // Error Handler
 router.use((err, req, res, next) => {
-  res.status(err.status || 500).json({message: err.message})
+  res.status(err.status).json({message: err.message})
 })
 
 module.exports = router
